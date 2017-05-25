@@ -1,14 +1,10 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
-
-import javax.swing.TransferHandler.TransferSupport;
 
 import data.*;
 
@@ -17,55 +13,78 @@ public class GTFSData {
 	private TreeMap<Long, Route> routes;
 	private TreeMap<Long, Trip> trips;
 	private TreeMap<Long, Stop> stops;
-	private TreeMap<Long, List<StopTime>> stoptimes;
+	private TreeMap<Long, List<StopTime>> stoptimesByTrip;
+	private TreeMap<Long, List<StopTime>> stoptimesByStop;
 	private TreeMap<Long, List<Transfer>> transfers;
 	
 	public static void main(String[] args) {
 		GTFSData gtfsData = new GTFSData("./ressources");
+		
+		// Ligne 10 Aller - départ 17:06:00
+		gtfsData.printTransfersFromTrip(10022803710917606L);
+		// Ligne 10 Retour - départ 17:05:00
+		gtfsData.printTransfersFromTrip(10022803710296022L);
 	}
 	
 	public GTFSData(String path) {
 		File rep = new File(path);
-		int cpt=0,cptTrip=0;
 		agencies = new TreeMap<Long, Agency>();
 		routes = new TreeMap<Long, Route>();
 		trips = new TreeMap<Long, Trip>();
 		stops = new TreeMap<Long, Stop>();
-		stoptimes = new TreeMap<Long, List<StopTime>>();
+		stoptimesByTrip = new TreeMap<Long, List<StopTime>>();
+		stoptimesByStop = new TreeMap<Long, List<StopTime>>();
 		transfers = new TreeMap<Long, List<Transfer>>();
 		parcourirRepertoire(rep);
-		Long tripId = 10022802431078872L;
-		for(StopTime stoptime : stoptimes.get(tripId)) {
-			System.out.print("[ Stop" + stops.get(stoptime.getStop_id()).getStop_name()
-					+ " - Departure " + stoptime.getDeparture_time()
-					+ " - Sequence "+ stoptime.getStop_sequence() + "] ");
-			cpt++;
-			if (cpt == 1) {
-				cpt = 0;
-				System.out.println();
-			}
-		}
-		
-		
-		/*
-		for (Long tripId = trips.firstKey(); tripId!=null;tripId=trips.higherKey(tripId)) {
-			System.out.println("Stop times of tripId "+ tripId + " : ");
-			for(StopTime stoptime : stoptimes.get(tripId)) {
-				System.out.print("[ Stop" + stoptime.getStop_id()  + " - Sequence "+ stoptime.getStop_sequence() + "] ");
-				cpt++;
-				if (cpt == 20) {
-					cpt = 0;
+	}
+	
+	public void printTransfersFromTrip(Long tripId) {
+		String print = "";
+		int cpt=0, cptTrans, sautLigne=1;
+		boolean transferMetro = false;
+		Route routeFrom = null, routeTo = null;
+		for(StopTime stoptime : getStoptimesByTrip().get(tripId)) {
+			transferMetro = false;
+			cptTrans=0;
+			System.out.println(stoptime.getStop_sequence() + " " + getStops().get(stoptime.getStop_id()).getStop_name()
+					+ " - StopId " + getStops().get(stoptime.getStop_id()).getStop_id()
+					// + " - Departure " + stoptime.getDeparture_time()
+					// + " - Sequence "+ stoptime.getStop_sequence() + "] "
+					// + " Trip headsign " + getTrips().get(tripId).getTrip_headsign()
+					);
+			if (getTransfers().get(stoptime.getStop_id())!= null) {
+				for (Transfer trans : getTransfers().get(stoptime.getStop_id())) {
+					if (getStops().get(trans.getFromId())!=null 
+							&& getStops().get(trans.getToId())!=null) {
+						routeFrom = getStoptimesByStop().get(trans.getFromId())
+								.get(0).getTrip().getRoute();
+						routeTo = getStoptimesByStop().get(trans.getToId())
+								.get(0).getTrip().getRoute();
+						print = "\t{ Transfer from [line ";
+						print+= routeFrom.getRoute_short_name();
+						print += " " + routeFrom.getRoute_long_name() + "]";
+						print+= " to [line ";
+						print+= routeTo.getRoute_short_name();
+						print += " " + routeTo.getRoute_long_name() + "]";
+						print+= " }, ";
+						System.out.print(print);
+						cptTrans++;
+						if (cptTrans%sautLigne==0) {
+							System.out.println();
+						}
+						transferMetro = true;
+					}
+				}
+				if (cptTrans%sautLigne!=0) {
 					System.out.println();
 				}
 			}
-			System.out.println();
-			cptTrip++;
-			if (cptTrip == 50) {
-				cptTrip = 0;
-				break;
+			if (!transferMetro) {
+				System.out.println("\tNo transfer to an other metro line");
 			}
+			cpt++;
 		}
-		*/
+		System.out.println("\nNombre d'arrets (stop) du trajet " +cpt + "\n");
 	}
 	
 	public void parcourirRepertoire ( File repertoire )
@@ -127,14 +146,6 @@ public class GTFSData {
 			readStopTimes(files[4]);
 		if (files[6].getName().equals("transfers.txt"))
 			readTranfers(files[6]);
-		/*
-			System.out.println("Agencies " + agencies);
-			System.out.println("Routes " + routes);
-			System.out.println("Stops " + stops);
-			//System.out.println("Stop times " + stoptimes);
-			System.out.println("Transfers " + transfers);
-			System.out.println("Trips " + trips);
-		*/
 	}
 
 	private void readTrips(File file) throws IOException {
@@ -149,6 +160,7 @@ public class GTFSData {
 		{
 		   lineData = line.split(",",-1);
 		   if (lineData.length<6) {
+				br.close();
 			   throw new IOException("Erreur format at line : " + line);
 		   }
 		   //System.out.println(line);
@@ -165,7 +177,7 @@ public class GTFSData {
 	}
 
 	private void readTranfers(File file) throws IOException {
-		Transfer transfer;
+		Transfer transferFrom, transferTo;
 		BufferedReader br = new BufferedReader(new FileReader(file));  
 		String line = null;  
 		String[] lineData;
@@ -175,6 +187,7 @@ public class GTFSData {
 		{
 		   lineData = line.split(",",-1);
 		   if (lineData.length<4) {
+				br.close();
 			   throw new IOException("Erreur format at line : " + line);
 		   }
 		   fromId = Long.valueOf(lineData[0]);
@@ -184,10 +197,18 @@ public class GTFSData {
 		   if (!transfers.containsKey(fromId)) {
 			   transfers.put(fromId, new ArrayList<Transfer>());
 		   }
+		   if (!transfers.containsKey(toId)) {
+			   transfers.put(toId, new ArrayList<Transfer>());
+		   }
 		   //System.out.println(from);
-		   transfer = new Transfer(fromId, toId, Integer.valueOf(lineData[2]), Long.valueOf(lineData[3]));
-		   transfers.get(fromId).add(transfer);
-		   
+		   transferFrom = new Transfer(fromId, toId, Integer.valueOf(lineData[2]), Long.valueOf(lineData[3]));
+		   if (!transfers.get(fromId).contains(transferFrom)) {
+			   transfers.get(fromId).add(transferFrom);
+		   }
+		   transferTo = new Transfer(toId, fromId, Integer.valueOf(lineData[2]), Long.valueOf(lineData[3]));
+		   if (!transfers.get(toId).contains(transferTo)) {
+				transfers.get(toId).add(transferTo);
+		   }
 		}
 		br.close();
 	}
@@ -202,6 +223,7 @@ public class GTFSData {
 		{  
 		   lineData = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)",-1);
 		   if (lineData.length<7) {
+				br.close();
 			   throw new IOException("Erreur format at line : " + line);
 		   }
 		   //System.out.println(line);
@@ -224,6 +246,7 @@ public class GTFSData {
 		{  
 		   lineData = line.split(",",-1);
 		   if (lineData.length<7) {
+				br.close();
 			   throw new IOException("Erreur format at line : " + line);
 		   }
 		   //System.out.println(line);
@@ -232,11 +255,18 @@ public class GTFSData {
 		   seq = Long.valueOf(lineData[4]);
 		   stoptime = new StopTime(trips.get(tripId), lineData[1], lineData[2], seq
 				   , stopId);
-		   if (!stoptimes.containsKey(tripId)) {
-			   stoptimes.put(tripId, new ArrayList<StopTime>());
+		   // Add to stopTimesByTrip
+		   if (!stoptimesByTrip.containsKey(tripId)) {
+			   stoptimesByTrip.put(tripId, new ArrayList<StopTime>());
 		   }
-		   stoptimes.get(tripId).add(stoptime);
+		   // Add to stopTimesByStop
+		   stoptimesByTrip.get(tripId).add(stoptime);
+		   if (!stoptimesByStop.containsKey(stopId)) {
+			   stoptimesByStop.put(stopId, new ArrayList<StopTime>());
+		   }
+		   stoptimesByStop.get(stopId).add(stoptime);
 		}
+		br.close();
 	}
 
 	private void readRoutes(File file) throws IOException {
@@ -251,6 +281,7 @@ public class GTFSData {
 		{  
 		   lineData = line.split(",",-1);
 		   if (lineData.length<9) {
+				br.close();
 			   throw new IOException("Erreur format at line : " + line);
 		   }
 		   //System.out.println(line);
@@ -284,6 +315,7 @@ public class GTFSData {
 		{  
 		   lineData = line.split(",",-1);
 		   if (lineData.length<4) {
+				br.close();
 			   throw new IOException("Erreur format at line : " + line);
 		   }
 		   //System.out.println(line);
@@ -292,5 +324,33 @@ public class GTFSData {
 		   agencies.put(agencyId, agency);
 		}
 		br.close();
+	}
+
+	public TreeMap<Long, Agency> getAgencies() {
+		return agencies;
+	}
+
+	public TreeMap<Long, Route> getRoutes() {
+		return routes;
+	}
+
+	public TreeMap<Long, Trip> getTrips() {
+		return trips;
+	}
+
+	public TreeMap<Long, Stop> getStops() {
+		return stops;
+	}
+
+	public TreeMap<Long, List<StopTime>> getStoptimesByTrip() {
+		return stoptimesByTrip;
+	}
+	
+	public TreeMap<Long, List<StopTime>> getStoptimesByStop() {
+		return stoptimesByStop;
+	}
+
+	public TreeMap<Long, List<Transfer>> getTransfers() {
+		return transfers;
 	}
 }

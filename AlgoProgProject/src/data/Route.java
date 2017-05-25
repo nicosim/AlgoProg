@@ -25,6 +25,12 @@ public class Route {
 	
 	public Route(Long id, String sn, String ln, int type, Agency a) {
 		route_id = id;
+		if (sn.startsWith("\"") && sn.endsWith("\"") && sn.length()>=2) {
+			sn = sn.substring(1, sn.length()-1);
+		}
+		if (ln.startsWith("\"") && ln.endsWith("\"") && ln.length()>=2) {
+			ln = ln.substring(1, ln.length()-1);
+		}
 		route_short_name = sn;
 		route_long_name = ln;
 		route_type = type;

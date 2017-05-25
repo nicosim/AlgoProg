@@ -23,6 +23,14 @@ public class Stop implements Comparable{
 	
 	public Stop(Long id, String name, String desc, Double lat, Double lon, int loctype) {
 		setStop_id(id);
+
+		if (name.startsWith("\"") && name.endsWith("\"") && name.length()>=2) {
+			name = name.substring(1, name.length()-1);
+		}
+
+		if (desc.startsWith("\"") && desc.endsWith("\"") && desc.length()>=2) {
+			desc = desc.substring(1, desc.length()-1);
+		}
 		stop_name = name;
 		stop_desc = desc;
 		stop_lat = lat;
@@ -92,6 +100,18 @@ public class Stop implements Comparable{
 
 	public void setParent_station(String parent_station) {
 		this.parent_station = parent_station;
+	}
+	
+	public boolean equals(Object o) {
+		boolean equal = true;
+		
+		if (!this.getClass().getName().equals(o.getClass().getName())) {
+			equal = false;
+		}
+		else if (!getStop_name().equals(((Stop)o).getStop_name())) {
+			equal = false;
+		}
+		return equal;
 	}
 
 	public int compareTo(Object o) throws ClassCastException {
