@@ -108,15 +108,16 @@ public class Stop implements Comparable{
 		if (!this.getClass().getName().equals(o.getClass().getName())) {
 			equal = false;
 		}
-		else if (!getStop_name().equals(((Stop)o).getStop_name())) {
+		else if (!getStop_id().equals(((Stop)o).getStop_id())) {
 			equal = false;
 		}
 		return equal;
 	}
 
 	public int compareTo(Object o) throws ClassCastException {
-	    if (!(o instanceof Stop))
+	    if (!(o.getClass().getName().equals(this.getClass().getName()))) {
 	      throw new ClassCastException("A Stop object expected.");
+	    }
 	    int res; 
 	    if (this.getStop_id() - ((Stop)o).getStop_id()<0) {
 	    	res =-1;

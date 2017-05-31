@@ -2,22 +2,25 @@ package graph;
 
 import java.util.ArrayList;
 
+import data.Stop;
+
 public class Node {
 
 	private ArrayList<Edge> edges;
-	private int value;
-	public static boolean directed= false;
+	private Stop value;
+	private String stringValue;
 	
-	public Node(int v) {
-		value = v;
+	public Node(Stop stop) {
+		value = stop;
+		stringValue = stop.getStop_id() + " " + stop.getStop_name();
 		edges = new ArrayList<Edge>();
 	}
 	
-	public int getValue() {
+	public Stop getValue() {
 		return value;
 	}
-	public void setValue(int value) {
-		this.value = value;
+	public void setValue(Stop stop) {
+		this.value = stop;
 	}
 	
 	public ArrayList<Edge> getEdges() {
@@ -37,23 +40,23 @@ public class Node {
 	
 	public void addEdge(Node n) {
 		edges.add(new Edge(this,n));
-		if (!directed && !n.hasPathTo(this)) {
-			n.addEdge(this);
-		}
 	}
 
 	public void addEdge(Node n, double weight) {
 		edges.add(new Edge(this,n, weight));
-		if (!directed && !n.hasPathTo(this)) {
-			n.addEdge(this, weight);
-		}
+	}
+	
+	public void setStringValue(String val) {
+		stringValue = val;
 	}
 	
 	public String toString() {
-		return String.valueOf(value);
+		return stringValue;
 	}
 	
 	public boolean equals(Object o) {
-		return this.getClass().equals(o.getClass()) && ((Node) o).getValue()==this.getValue();
+		return this.getClass().equals(o.getClass()) 
+				&& ((Node) o).getValue().getStop_lat().equals(this.getValue().getStop_lat())
+				&& ((Node) o).getValue().getStop_lon().equals(this.getValue().getStop_lon());
 	}
 }

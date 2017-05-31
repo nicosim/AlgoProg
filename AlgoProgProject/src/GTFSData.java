@@ -19,11 +19,19 @@ public class GTFSData {
 	
 	public static void main(String[] args) {
 		GTFSData gtfsData = new GTFSData("./ressources");
-		
+		String stationName="Nation", departure="14:37:00";
+		/*
 		// Ligne 10 Aller - départ 17:06:00
 		gtfsData.printTransfersFromTrip(10022803710917606L);
 		// Ligne 10 Retour - départ 17:05:00
 		gtfsData.printTransfersFromTrip(10022803710296022L);
+		*/
+		// OrlyVal Aller
+		gtfsData.printTransfersFromTrip(10500872820081804L);
+		
+
+		//gtfsData.printLineFromStationAndTime(stationName, departure);
+		
 	}
 	
 	public GTFSData(String path) {
@@ -87,6 +95,25 @@ public class GTFSData {
 		System.out.println("\nNombre d'arrets (stop) du trajet " +cpt + "\n");
 	}
 	
+	public void printLineFromStationAndTime(String stationName, String time) {
+		String print = "";
+		int cpt=0, cptTrans, sautLigne=1;
+		boolean transferMetro = false;
+		Long stationId = null;
+		System.out.println("Recherche station " + stationName + " départ à " + time);
+		for(Long stopIt = getStops().firstKey();stopIt!=null;stopIt = getStops().higherKey(stopIt)) {
+			if (getStops().get(stopIt).getStop_name().equals(stationName)) {
+				stationId = stopIt;
+				System.out.println("station ID : " + stationId);
+				break;
+			}
+		}
+		Route routeFrom = null, routeTo = null;
+		for(StopTime stopTime : getStoptimesByStop().get(stationId)) {
+			System.out.println("Arrivé à "+stopTime.getArrival_time());
+		}
+	}
+	
 	public void parcourirRepertoire ( File repertoire )
 	{
 	    if (repertoire.exists())
@@ -127,25 +154,28 @@ public class GTFSData {
 	
 	public void readFiles(File file) throws IOException {
 		File[] files = file.listFiles();
-		if (files.length != 8) {
+		if (files.length < 8) {
 			return;
 		}
-		if (files[0].getName().equals("agency.txt"))
-			readAgency(files[0]);
-		if (files[1].getName().equals("calendar_dates.txt"))
-			readCalendarDate(files[1]);
-		if (files[2].getName().equals("calendar.txt"))
-			readCalendar(files[2]);
-		if (files[3].getName().equals("routes.txt"))
-			readRoutes(files[3]);
-		if (files[7].getName().equals("trips.txt"))
-			readTrips(files[7]);
-		if (files[5].getName().equals("stops.txt"))
-			readStops(files[5]);
-		if (files[4].getName().equals("stop_times.txt"))
-			readStopTimes(files[4]);
-		if (files[6].getName().equals("transfers.txt"))
-			readTranfers(files[6]);
+		for (int i = 0; i <files.length; i++) {
+		if (files[i].getName().equals("agency.txt")) {
+			readAgency(files[i]);
+			if (files[i+1].getName().equals("calendar_dates.txt"))
+				readCalendarDate(files[i+1]);
+			if (files[i+2].getName().equals("calendar.txt"))
+				readCalendar(files[i+2]);
+			if (files[i+3].getName().equals("routes.txt"))
+				readRoutes(files[i+3]);
+			if (files[i+7].getName().equals("trips.txt"))
+				readTrips(files[i+7]);
+			if (files[i+5].getName().equals("stops.txt"))
+				readStops(files[i+5]);
+			if (files[i+4].getName().equals("stop_times.txt"))
+				readStopTimes(files[i+4]);
+			if (files[i+6].getName().equals("transfers.txt"))
+				readTranfers(files[i+6]);
+			}
+		}
 	}
 
 	private void readTrips(File file) throws IOException {
@@ -259,8 +289,8 @@ public class GTFSData {
 		   if (!stoptimesByTrip.containsKey(tripId)) {
 			   stoptimesByTrip.put(tripId, new ArrayList<StopTime>());
 		   }
-		   // Add to stopTimesByStop
 		   stoptimesByTrip.get(tripId).add(stoptime);
+		   // Add to stopTimesByStop
 		   if (!stoptimesByStop.containsKey(stopId)) {
 			   stoptimesByStop.put(stopId, new ArrayList<StopTime>());
 		   }
