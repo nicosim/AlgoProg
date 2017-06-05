@@ -1,7 +1,15 @@
+package main;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.swing.JFrame;
+
+import algorithms.BFSShortestPaths;
+import algorithms.ClusterAlgorithm;
+import algorithms.DijsktraSP;
 import data.*;
 import graph.*;
 
@@ -14,11 +22,30 @@ public class Graph {
 			//Node.directed = true;
 			GTFSData gtfsData = new GTFSData("./ressources");
 			Graph g  = new Graph(gtfsData);
-			DijsktraSP dfsSp = new DijsktraSP(g);
+			Graph g2  = new Graph(gtfsData);
+			//DijsktraSP dfsSp = new DijsktraSP(g);
+			//BFSShortestPaths bfsSp = new BFSShortestPaths(g);
 			//System.out.println("NbStops : " + gtfsData.getStops().size() + " NbNodes : " + g.getNodes().size());
-			dfsSp.dfs(g,g.getNodes().get(20));
-			System.out.println("dfs : \n" + dfsSp.printSP(106));
-			//System.out.println("bfs : \n" + bfs(g).toString());
+			//dfsSp.dfs(g,g.getNodes().get(20));
+			//System.out.println("Dijsktra : \n" + dfsSp.printSP(106));
+			//bfsSp.bfs(g,g.getNodes().get(20));
+			//System.out.println("bfs : \n" + bfsSp.printSP(106));
+			//g.printGraph();
+			
+			ClusterAlgorithm clustering = new ClusterAlgorithm(g);
+			clustering.init();
+			clustering.run();
+			g.printGraph();
+			//g2.printGraph();
+			for (int i = 0; i < g.getNodes().size() && i < g2.getNodes().size(); ++i) {
+				/*
+				System.out.println("Before " + g2.getNodes().get(i)
+								+ " " + g2.getNodes().get(i).getEdges().size()
+								+ " After "+ g.getNodes().get(i)
+								+ " " + g.getNodes().get(i).getEdges().size());
+				*/
+			}
+			
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -66,7 +93,7 @@ public class Graph {
 		addTransfers(datas);
 	}
 	
-	public TreeMap<Long,Long> getBestTripsByRoute(GTFSData datas){
+	private TreeMap<Long,Long> getBestTripsByRoute(GTFSData datas){
 		TreeMap<Long,Integer> routeSizes = new TreeMap<Long, Integer>();
 		TreeMap<Long,Long> routeTrip = new TreeMap<Long, Long>();
 		Long routeId;
@@ -109,7 +136,7 @@ public class Graph {
 		return routeTrip;
 	}
 	
-	public void addTransfers(GTFSData datas) {
+	private void addTransfers(GTFSData datas) {
 		Node temp, to;
 		for (Node node : nodes) 
 		{
@@ -144,7 +171,7 @@ public class Graph {
 	 * @param datas 
 	 * @return node contenu dans la liste
 	 */
-	public Node getNodeFromList(Node node, GTFSData datas) {
+	private Node getNodeFromList(Node node, GTFSData datas) {
 		String val="";
 		List<StopTime> stopTimes;
 		if (!nodes.contains(node)) 
@@ -187,5 +214,12 @@ public class Graph {
 
 	public ArrayList<Node> getNodes() {
 		return nodes;
+	}
+	
+	public void printGraph() {
+		JGraph jgraph = new JGraph(this);
+		jgraph.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jgraph.setSize(1500, 1000);
+		jgraph.setVisible(true);
 	}
 }

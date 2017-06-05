@@ -29,7 +29,7 @@ public class Edge implements Comparable<Edge>{
 	}
 	
 	public String toString() {
-		return from.getValue() + " - " + to.getValue() + " : " + weight; 
+		return from.toString() + " - " + to.toString() + " : " + weight; 
 	}
 	
 	public boolean equals(Object o) {

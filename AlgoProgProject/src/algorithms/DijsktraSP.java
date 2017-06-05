@@ -1,6 +1,8 @@
+package algorithms;
 import java.util.ArrayList;
 
 import graph.*;
+import main.Graph;
 
 public class DijsktraSP {
 	private Graph g;
@@ -16,13 +18,7 @@ public class DijsktraSP {
 		previous = new int[g.getNodes().size()];
 		distance = new double[g.getNodes().size()];
 		value = new String[g.getNodes().size()];
-		start = 0;
-		for (int i=0; i < g.getNodes().size(); ++i) {
-			marked[i] = false;
-			previous[i] = -1;
-			distance[i] = Integer.MAX_VALUE;
-			value[i] = g.getNodes().get(i).toString();
-		}
+		init();
 	}
 	
 	public int getStart() {
@@ -36,16 +32,25 @@ public class DijsktraSP {
 	public void setGraph(Graph g) {
 		this.g=g;
 	}
+	
+	public void init() {
+		start = 0;
+		for (int i=0; i < g.getNodes().size(); ++i) {
+			marked[i] = false;
+			previous[i] = -1;
+			distance[i] = Integer.MAX_VALUE;
+			value[i] = g.getNodes().get(i).toString();
+		}
+	}
 
 	public void dfs(Graph g, Node node) {
-		//Node.directed =true;
 		setGraph(g);
 		setStart(g.getNodes().indexOf(node));
 		marked[getStart()] = true;
 		distance[getStart()] = 0;
 		previous[getStart()] = -1;
 		dfs(node);
-		System.out.println(toString());
+		//System.out.println(toString());
 	}
 		
 	public void dfs(Node node){
@@ -84,7 +89,8 @@ public class DijsktraSP {
 	}
 	
 	public String printSP(int v) {
-		String s="[" + value[v] + "]";
+		String s="";
+		s+="[" + value[v] + "]";
 		int pos = v, cpt=1, modulo=5;
 		//System.out.println(start + " " + pos);
 		if (pos !=start) {
@@ -107,6 +113,7 @@ public class DijsktraSP {
 				//System.out.println(s);
 			}
 		}
+		s = "Shortest Path with a weight of " + distance[v] + " and a number of "+ cpt + " stations\n" + s;
 		return s;
 	}
 	
@@ -119,6 +126,10 @@ public class DijsktraSP {
 			}
 		}
 		return true;
+	}
+	
+	public int[] getPrevious() {
+		return previous;
 	}
 	
 	public String toString() {
