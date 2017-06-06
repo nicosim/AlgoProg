@@ -1,9 +1,14 @@
 package graph;
+import java.awt.Font;
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
+import com.mxgraph.view.mxStylesheet;
 
 import main.Graph;
 
@@ -17,6 +22,18 @@ public class JGraph extends JFrame {
 		super("JGrapghX");
 		mxgraph = new mxGraph();
 		mxGraphComponent graphComponent = new mxGraphComponent(mxgraph);
+
+		Map<String, Object> vstyle = mxgraph.getStylesheet().getDefaultVertexStyle();
+		vstyle.put(mxConstants.STYLE_FONTSIZE, "10");
+		Map<String, Object> estyle = mxgraph.getStylesheet().getDefaultEdgeStyle();
+		estyle.put(mxConstants.STYLE_FONTSIZE, "10");
+
+		setLocation(30000, 2000);
+		
+		mxStylesheet stylesheet = new mxStylesheet();
+		stylesheet.setDefaultVertexStyle(vstyle);
+		stylesheet.setDefaultEdgeStyle(estyle);
+		mxgraph.setStylesheet(stylesheet);
 		getContentPane().add(graphComponent); 
 	}
 	
@@ -35,7 +52,7 @@ public class JGraph extends JFrame {
 		mxgraph.setCellsResizable(true);
 		Double lat, lon;
 		String latS, lonS;
-		double resize=Math.pow(10, 11);
+		double resize=5;
 		Edge edge;
 		try
 		{
@@ -45,10 +62,11 @@ public class JGraph extends JFrame {
 				lon = graph.getNodes().get(i).getValue().getStop_lon();
 				latS = lat.toString();
 				lonS = lon.toString();
-				latS = latS.substring(latS.indexOf(".")+1,latS.length());
-				lonS = lonS.substring(lonS.indexOf(".")+1,lonS.length());
+				latS = latS.substring(0,latS.indexOf(".")-1) + latS.substring(latS.indexOf(".")+1,latS.indexOf(".")+6);
+				lonS = lonS.substring(0,lonS.indexOf(".")-1) + lonS.substring(lonS.indexOf(".")+1,lonS.indexOf(".")+6);
 				lat = Double.parseDouble(latS)/resize;
 				lon = Double.parseDouble(lonS)/resize;
+				System.out.println(lat + " " + lon);
 				listV[i]= mxgraph.insertVertex(parent, null, graph.getNodes().get(i).toString(), 
 						lon, lat, graph.getNodes().get(i).toString().length()*5.5,20);
 			}
