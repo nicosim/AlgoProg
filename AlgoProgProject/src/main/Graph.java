@@ -23,28 +23,30 @@ public class Graph {
 			GTFSData gtfsData = new GTFSData("./ressources");
 			Graph g  = new Graph(gtfsData);
 			Graph g2  = new Graph(gtfsData);
-			//DijsktraSP dfsSp = new DijsktraSP(g);
-			//BFSShortestPaths bfsSp = new BFSShortestPaths(g);
+			DijsktraSP dfsSp = new DijsktraSP(g);
+			int from = 20, to = 106;
+			BFSShortestPaths bfsSp = new BFSShortestPaths(g);
 			//System.out.println("NbStops : " + gtfsData.getStops().size() + " NbNodes : " + g.getNodes().size());
-			//dfsSp.dfs(g,g.getNodes().get(20));
-			//System.out.println("Dijsktra : \n" + dfsSp.printSP(106));
-			//bfsSp.bfs(g,g.getNodes().get(20));
-			//System.out.println("bfs : \n" + bfsSp.printSP(106));
+			dfsSp.dfs(g,g.getNodes().get(from));
+			System.out.println("Dijsktra : from "+ g.getNodes().get(from) + " to " + g.getNodes().get(to) + "\n" + dfsSp.printSP(to));
+			bfsSp.bfs(g,g.getNodes().get(from));
+			System.out.println("bfs : from "+ g.getNodes().get(from) + " to " + bfsSp.printSP(106));
 			//g.printGraph();
-			
+			/*
 			ClusterAlgorithm clustering = new ClusterAlgorithm(g);
 			clustering.init();
 			clustering.run();
-			g.printGraph();
+			//g.printGraph();
 			//g2.printGraph();
 			for (int i = 0; i < g.getNodes().size() && i < g2.getNodes().size(); ++i) {
-				/*
+				
 				System.out.println("Before " + g2.getNodes().get(i)
 								+ " " + g2.getNodes().get(i).getEdges().size()
 								+ " After "+ g.getNodes().get(i)
 								+ " " + g.getNodes().get(i).getEdges().size());
-				*/
+				
 			}
+			*/
 			
 		}
 		catch (Exception e) {

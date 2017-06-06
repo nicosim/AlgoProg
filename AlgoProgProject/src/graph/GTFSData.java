@@ -21,14 +21,14 @@ public class GTFSData {
 	public static void main(String[] args) {
 		GTFSData gtfsData = new GTFSData("./ressources");
 		String stationName="Nation", departure="14:37:00";
-		/*
+		
 		// Ligne 10 Aller - départ 17:06:00
 		gtfsData.printTransfersFromTrip(10022803710917606L);
 		// Ligne 10 Retour - départ 17:05:00
 		gtfsData.printTransfersFromTrip(10022803710296022L);
-		*/
+		
 		// OrlyVal Aller
-		gtfsData.printTransfersFromTrip(10500872820081804L);
+		//gtfsData.printTransfersFromTrip(10500872820081804L);
 		
 
 		//gtfsData.printLineFromStationAndTime(stationName, departure);
@@ -126,7 +126,7 @@ public class GTFSData {
 		        {
 		        	if (fichiers[0].getName().equals("agency.txt")) {
 			            try {
-			            	//System.out.println(repertoire.getPath());
+			            	System.out.println(repertoire.getPath());
 							readFiles(repertoire);
 						} catch (IOException e) {
 							System.out.println("Erreur de lecture du fichier : " 
@@ -155,28 +155,50 @@ public class GTFSData {
 	
 	public void readFiles(File file) throws IOException {
 		File[] files = file.listFiles();
+		int cpt=0;
 		if (files.length < 8) {
 			return;
 		}
-		for (int i = 0; i <files.length; i++) {
-		if (files[i].getName().equals("agency.txt")) {
-			readAgency(files[i]);
-			if (files[i+1].getName().equals("calendar_dates.txt"))
-				readCalendarDate(files[i+1]);
-			if (files[i+2].getName().equals("calendar.txt"))
-				readCalendar(files[i+2]);
-			if (files[i+3].getName().equals("routes.txt"))
-				readRoutes(files[i+3]);
-			if (files[i+7].getName().equals("trips.txt"))
-				readTrips(files[i+7]);
-			if (files[i+5].getName().equals("stops.txt"))
-				readStops(files[i+5]);
-			if (files[i+4].getName().equals("stop_times.txt"))
-				readStopTimes(files[i+4]);
-			if (files[i+6].getName().equals("transfers.txt"))
-				readTranfers(files[i+6]);
+		while (cpt<files.length && cpt<8) {
+			for (int i = 0; i <files.length; i++) {
+				if (cpt==0 && files[i].getName().equals("agency.txt")) {
+					readAgency(files[i]);
+					cpt++;
+				}
+				else if (cpt==1 && files[i].getName().equals("calendar_dates.txt"))
+				{
+					readCalendarDate(files[i]);
+					cpt++;
+				}
+				else if (cpt==2 && files[i].getName().equals("calendar.txt"))
+				{
+					readCalendar(files[i]);
+					cpt++;
+				}
+				else if (cpt==3 && files[i].getName().equals("routes.txt"))
+				{
+					readRoutes(files[i]);
+					cpt++;
+				}
+				else if (cpt==4 && files[i].getName().equals("trips.txt")) {
+					readTrips(files[i]);
+					cpt++;
+				}
+				else if (cpt==5 && files[i].getName().equals("stops.txt")) {
+					readStops(files[i]);
+					cpt++;
+				}
+				else if (cpt==6 && files[i].getName().equals("stop_times.txt")) {
+					readStopTimes(files[i]);
+					cpt++;
+				}
+				else if (cpt==7 && files[i].getName().equals("transfers.txt")) {
+					readTranfers(files[i]);
+					cpt++;
+				}
 			}
 		}
+		//System.out.println("read Files done");
 	}
 
 	private void readTrips(File file) throws IOException {

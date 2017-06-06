@@ -46,11 +46,9 @@ public class ClusterAlgorithm {
 	}
 	
 	public void run() {
-		int value;
+		int value, size;;
 		Edge min=null, max= null;
 		numEdgeRemoved=0;
-		System.out.println(edgeBetweeness);
-		System.out.println(edgeBetweeness.size());
 		do {
 			min = edgeBetweeness.firstKey();
 			max = min;
@@ -65,17 +63,18 @@ public class ClusterAlgorithm {
 				}
 			}
 			if (min.weight()!=max.weight()) {
+				System.out.println("remove" + max);
 				removeEdge(max);
 				numEdgeRemoved++;
 			}
+			System.out.println("after " + edgeBetweeness);
+			System.out.println("after " + edgeBetweeness.size());
 		} while(min.weight()!=max.weight());
-		System.out.println(edgeBetweeness);
-		System.out.println(edgeBetweeness.size());
 	}
 	
 	public void removeEdge(Edge edge) {
+		graph.getNodes().get(graph.getNodes().indexOf(edge.from())).getEdges().remove(edge);
 		edge.from().getEdges().remove(edge);
-		edge.to().getEdges().remove(edge);
 		edgeBetweeness.remove(edge);
 		edge = null;
 		
