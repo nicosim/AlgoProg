@@ -22,38 +22,27 @@ public class JGraph extends JFrame {
 		super("JGrapghX");
 		mxgraph = new mxGraph();
 		mxGraphComponent graphComponent = new mxGraphComponent(mxgraph);
-
-		Map<String, Object> vstyle = mxgraph.getStylesheet().getDefaultVertexStyle();
-		vstyle.put(mxConstants.STYLE_FONTSIZE, "10");
-		Map<String, Object> estyle = mxgraph.getStylesheet().getDefaultEdgeStyle();
-		estyle.put(mxConstants.STYLE_FONTSIZE, "10");
-
-		setLocation(30000, 2000);
-		
-		mxStylesheet stylesheet = new mxStylesheet();
-		stylesheet.setDefaultVertexStyle(vstyle);
-		stylesheet.setDefaultEdgeStyle(estyle);
-		mxgraph.setStylesheet(stylesheet);
 		getContentPane().add(graphComponent); 
 	}
 	
 	public JGraph(Graph g) {
 		this();
 		graph = g;
-		showGraph();
 		
 	}
 	
 	public void showGraph(){
 		Object parent = mxgraph.getDefaultParent();
 		Object[] listV;
-		mxgraph.getModel().beginUpdate();
-		mxgraph.setAutoSizeCells(true);
-		mxgraph.setCellsResizable(true);
-		Double lat, lon;
+		Double lat, lon, maxLat=99000d, minLon = 4000d;
 		String latS, lonS;
 		double resize=5;
 		Edge edge;
+		mxgraph.getModel().beginUpdate();
+		mxgraph.setAutoSizeCells(true);
+		mxgraph.setCellsResizable(true);
+		setFontSize("10");
+		System.out.println("show graph");
 		try
 		{
 			listV = new Object[graph.getNodes().size()];
@@ -64,8 +53,8 @@ public class JGraph extends JFrame {
 				lonS = lon.toString();
 				latS = latS.substring(0,latS.indexOf(".")-1) + latS.substring(latS.indexOf(".")+1,latS.indexOf(".")+6);
 				lonS = lonS.substring(0,lonS.indexOf(".")-1) + lonS.substring(lonS.indexOf(".")+1,lonS.indexOf(".")+6);
-				lat = Double.parseDouble(latS)/resize;
-				lon = Double.parseDouble(lonS)/resize;
+				lat = maxLat - Double.parseDouble(latS)/resize;
+				lon = Double.parseDouble(lonS)/resize - minLon;
 				System.out.println(lat + " " + lon);
 				listV[i]= mxgraph.insertVertex(parent, null, graph.getNodes().get(i).toString(), 
 						lon, lat, graph.getNodes().get(i).toString().length()*5.5,20);
@@ -86,5 +75,64 @@ public class JGraph extends JFrame {
 		{
 			mxgraph.getModel().endUpdate();
 		}
+	}
+
+	public void showIconGraph(){
+		Object parent = mxgraph.getDefaultParent();
+		Object[] listV;
+		Double lat, lon, maxLat=24800d, minLon = 1000d;
+		String latS, lonS;
+		double resize=20;
+		Edge edge;
+		mxgraph.getModel().beginUpdate();
+		mxgraph.setAutoSizeCells(true);
+		mxgraph.setCellsResizable(true);
+		setFontSize("5");
+		System.out.println("show icon graph");
+		try
+		{
+			listV = new Object[graph.getNodes().size()];
+			for (int i = 0; i < graph.getNodes().size(); i++){
+				lat = graph.getNodes().get(i).getValue().getStop_lat();
+				lon = graph.getNodes().get(i).getValue().getStop_lon();
+				latS = lat.toString();
+				lonS = lon.toString();
+				latS = latS.substring(0,latS.indexOf(".")-1) + latS.substring(latS.indexOf(".")+1,latS.indexOf(".")+6);
+				lonS = lonS.substring(0,lonS.indexOf(".")-1) + lonS.substring(lonS.indexOf(".")+1,lonS.indexOf(".")+6);
+				lat = maxLat-Double.parseDouble(latS)/resize;
+				lon = Double.parseDouble(lonS)/resize - minLon;
+				System.out.println(lat + " " + lon);
+				listV[i]= mxgraph.insertVertex(parent, null, graph.getNodes().get(i).toString(), 
+						lon, lat, graph.getNodes().get(i).toString().length()*2.5,7);
+			}
+			
+			for (int i = 0; i < graph.getNodes().size(); i++){
+				for (int j=0;j<graph.getNodes().get(i).getEdges().size();j++){
+					edge = graph.getNodes().get(i).getEdges().get(j);
+					mxgraph.insertEdge(parent, null, "", listV[i],
+							listV[graph.getNodes().indexOf(edge.to())]);
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally
+		{
+			mxgraph.getModel().endUpdate();
+		}
+	}
+	
+	private void setFontSize(String size) {
+		Map<String, Object> vstyle = mxgraph.getStylesheet().getDefaultVertexStyle();
+		vstyle.put(mxConstants.STYLE_FONTSIZE, size);
+		Map<String, Object> estyle = mxgraph.getStylesheet().getDefaultEdgeStyle();
+		estyle.put(mxConstants.STYLE_FONTSIZE, size);
+
+		
+		mxStylesheet stylesheet = new mxStylesheet();
+		stylesheet.setDefaultVertexStyle(vstyle);
+		stylesheet.setDefaultEdgeStyle(estyle);
+		mxgraph.setStylesheet(stylesheet);
 	}
 }

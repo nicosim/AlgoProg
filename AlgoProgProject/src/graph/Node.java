@@ -53,7 +53,7 @@ public class Node {
 	public String toString() {
 		return stringValue;
 	}
-	
+
 	public boolean equals(Object o) {
 		return this.getClass().equals(o.getClass()) 
 				&& ((Node) o).getValue().getStop_lat().equals(this.getValue().getStop_lat())

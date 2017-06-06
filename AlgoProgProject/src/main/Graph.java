@@ -31,7 +31,8 @@ public class Graph {
 			System.out.println("Dijsktra : from "+ g.getNodes().get(from) + " to " + g.getNodes().get(to) + "\n" + dfsSp.printSP(to));
 			bfsSp.bfs(g,g.getNodes().get(from));
 			System.out.println("bfs : from "+ g.getNodes().get(from) + " to " + bfsSp.printSP(106));
-			//g.printGraph();
+			g.printGraph();
+
 			/*
 			ClusterAlgorithm clustering = new ClusterAlgorithm(g);
 			clustering.init();
@@ -219,9 +220,17 @@ public class Graph {
 	}
 	
 	public void printGraph() {
-		JGraph jgraph = new JGraph(this);
+		JGraph jgraph, jIconGraph;
+		jgraph = new JGraph(this);
 		jgraph.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jgraph.setSize(1500, 1000);
+		jgraph.showGraph();
 		jgraph.setVisible(true);
+		jIconGraph = new JGraph(this);
+		jIconGraph.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jIconGraph.setSize(1500, 1000);
+		jIconGraph.showIconGraph();
+		jIconGraph.setVisible(true);
+		
 	}
 }
